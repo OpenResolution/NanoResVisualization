@@ -40,7 +40,8 @@ export default function App() {
     const [visualizer3DView, projectionView, controlPanelView] = useRefs<HTMLDivElement>(null);
 
     return (
-        <div className="container">
+        // <div className="container">
+        <div className="full-screen-container">
             {/* <Canvas className="canvas">
                 <View index={1} track={visualizer3DView as MutableRefObject<HTMLElement>}>
                     <PointCloud/>
