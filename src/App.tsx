@@ -1,43 +1,40 @@
-import React, { forwardRef, MutableRefObject } from 'react';
+import React, { useState, forwardRef, MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { View } from '@react-three/drei';
 import useRefs from 'react-use-refs';
 import { Mesh } from 'three'
-import PointCloud from './point-cloud';
+import ParticlesVisualization from './partical_visualization';
 
-interface MainPanelProps {
-    a: string
-    // Additional props can be added here if needed
-}
+// interface MainPanelProps {
+//     a: string
+//     // Additional props can be added here if needed
+// }
 
-const MainPanel = forwardRef<HTMLDivElement, MainPanelProps>((props, fref) => {
-    return <div ref={fref} className="panel" style={{ gridArea: 'main' }}></div>;
-});
+// const MainPanel = forwardRef<HTMLDivElement, MainPanelProps>((props, fref) => {
+//     return <div ref={fref} className="panel" style={{ gridArea: 'main' }}></div>;
+// });
 
-interface SidePanelProps {
-    which: string;
-}
+// interface SidePanelProps {
+//     which: string;
+// }
 
-const SidePanel = forwardRef<HTMLDivElement, SidePanelProps>(({ which }, fref) => {
-    return <div ref={fref} className="panel" style={{ gridArea: which }}></div>;
-});
+// const SidePanel = forwardRef<HTMLDivElement, SidePanelProps>(({ which }, fref) => {
+//     return <div ref={fref} className="panel" style={{ gridArea: which }}></div>;
+// });
 
 export default function App() {
-    const containerWidth = window.innerWidth - 400;
-    const containerHeight = window.innerHeight;
-
-    const cameraPhi = 0.5;
+    const cameraPhi = 0.3*Math.PI;
     const cameraTheta = Math.PI / 6;
     const cameraDistance = 2;
-    const cameraPosition = new THREE.Vector3(
+    const [cameraPosition, setCameraPosition] = useState(new THREE.Vector3(
         cameraDistance * Math.cos(cameraTheta) * Math.cos(cameraPhi),
         cameraDistance * Math.sin(cameraTheta),
-        cameraDistance * Math.cos(cameraTheta) * Math.sin(cameraPhi),
-    );
-    const cameraLookAt = new THREE.Vector3(0, 0, 0);
+        cameraDistance * Math.cos(cameraTheta) * Math.sin(cameraPhi)
+    ));
+    // const cameraLookAt = new THREE.Vector3(0, 0, 0);
 
-    const [visualizer3DView, projectionView, controlPanelView] = useRefs<HTMLDivElement>(null);
+    // const [visualizer3DView, projectionView, controlPanelView] = useRefs<HTMLDivElement>(null);
 
     return (
         // <div className="container">
@@ -56,15 +53,15 @@ export default function App() {
 
             <Canvas
                 camera={{
-                    fov: 45,
-                    aspect: containerWidth / containerHeight,
-                    near: 0.0001,
-                    far: 100,
+                    fov: 60,
+                    // near: 0.0001,
+                    // far: 100,
                     position: cameraPosition,
-                    rotation: [0, 0, 0]
+                    // rotation: [0, 0, 0]
                 }}
             >
-                <PointCloud fileName='/data/Tubulin_15_cor_605332.csv' />
+                <color attach="background" args={['black']}/>
+                <ParticlesVisualization />
             </Canvas>
         </div>
     );

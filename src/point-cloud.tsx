@@ -1,22 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
+import { AdditiveBlending } from 'three';
+
+const particle_size = 0.06;  // 0.008 0.03
+const opacity = 0.008;  // 0.015
+
+const vertexShader=
+    `uniform float scale;
+    attribute vec3 color;
+    varying vec3 color_trans;
+
+    void main() {
+
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+        gl_PointSize = scale * ( 300.0 / - mvPosition.z );
+
+        gl_Position = projectionMatrix * mvPosition;
+        color_trans = color;
+
+    }`;
+
+const fragmentShader=
+    `uniform float opacity;
+    varying vec3 color_trans;
+
+    void main() {
+        float r = length( gl_PointCoord - vec2( 0.5, 0.5 ) );
+        if (  r> 0.5 )
+            discard;
+
+        gl_FragColor = vec4( color_trans*(opacity*exp(-r*r*10.)), 1.0);
+
+    }`;
 
 type PointCloudProps = {
     fileName: string;
 };
 
 export default function PointCloud({fileName}: PointCloudProps) {
-    console.log(fileName)
     const [positions, setPositions] = useState(new Float32Array());
     const [colors, setColors] = useState(new Float32Array());
 
     useEffect(() => {
+        console.log(fileName)
         async function loadData() {
             const fileContent = await fetch(fileName);
-            console.log(fileContent)
+            // console.log(fileContent)
             const data = await fileContent.text()
             const rows = data.split('\n');
-            console.log(rows)
+            // console.log(rows)
 
             const headers = rows[0].split(',');
 
@@ -60,23 +93,32 @@ export default function PointCloud({fileName}: PointCloudProps) {
 
     return (
         <points>
-            <bufferGeometry attach="geometry">
+            {positions.length>0 && <bufferGeometry attach="geometry">
               <bufferAttribute
                   attach="attributes-position"
                   count={positions.length / 3}
                   array={positions}
                   itemSize={3}
-                  usage={THREE.DynamicDrawUsage}
+                //   usage={THREE.DynamicDrawUsage}
                 />
                 <bufferAttribute
                   attach="attributes-color"
                   count={colors.length / 3}
                   array={colors}
                   itemSize={3}
-                  usage={THREE.DynamicDrawUsage}
+                //   usage={THREE.DynamicDrawUsage}
                 />
-            </bufferGeometry>
-            <pointsMaterial attach="material" vertexColors size={10} sizeAttenuation={false} />
+            </bufferGeometry>}
+            <shaderMaterial
+                uniforms={{
+                    opacity: {value: opacity},
+                    scale: {value: particle_size},
+                }}
+                vertexShader={vertexShader}
+                fragmentShader={fragmentShader}
+                blending={AdditiveBlending}
+                depthTest={false}
+            />
         </points>
       ); 
 }
